@@ -1,11 +1,14 @@
+
 import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import InterviewCard from "@/components/InterviewCard";
 import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Moon, Sun } from "lucide-react";
 import ShareExperienceDialog from "@/components/ShareExperienceDialog";
+import { useTheme } from "next-themes";
 
+// Expanded mock data with more diverse experiences
 export const mockInterviews = [
   {
     id: 1,
@@ -25,12 +28,49 @@ export const mockInterviews = [
       "Started with behavioral questions about team collaboration. Then moved to technical discussion about microservices architecture. Coding round involved solving a problem about optimizing database queries.",
     comments: 3,
   },
+  {
+    id: 3,
+    company: "Global Software Inc",
+    position: "Cloud Solutions Architect",
+    date: "2024-03-13",
+    experience:
+      "Intensive system design rounds focusing on scalability and high availability. Had to design a distributed caching system and discuss various AWS services. Deep dive into previous projects involving cloud architecture.",
+    comments: 7,
+  },
+  {
+    id: 4,
+    company: "DataTech Solutions",
+    position: "Machine Learning Engineer",
+    date: "2024-03-12",
+    experience:
+      "Technical assessment included implementing a recommendation system. Discussion about various ML algorithms and their practical applications. Final round focused on deploying ML models in production.",
+    comments: 4,
+  },
+  {
+    id: 5,
+    company: "Startup Ventures",
+    position: "Mobile Developer",
+    date: "2024-03-11",
+    experience:
+      "Cross-platform development discussion with React Native vs Flutter debate. Live coding session building a simple social media feed. Architecture discussion about state management in mobile apps.",
+    comments: 6,
+  },
+  {
+    id: 6,
+    company: "Security Systems Co",
+    position: "Security Engineer",
+    date: "2024-03-10",
+    experience:
+      "Deep dive into cybersecurity concepts. Practical exercise involving identifying vulnerabilities in a sample application. Discussion about implementing OAuth2 and handling sensitive data.",
+    comments: 8,
+  }
 ];
 
 const Index = () => {
   const [interviews, setInterviews] = useState(mockInterviews);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState<typeof mockInterviews[0] | null>(null);
+  const { theme, setTheme } = useTheme();
 
   const handleSearch = (query: string) => {
     if (query === "") {
@@ -50,8 +90,22 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       <div className="container px-4 py-8 mx-auto">
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
+
         <div className="text-center mb-12 animate-fade-up">
           <h1 className="text-4xl font-bold mb-4">Interview Helper</h1>
           <p className="text-muted-foreground mb-8">
