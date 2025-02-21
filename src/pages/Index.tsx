@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchBar from "@/components/SearchBar";
 import InterviewCard from "@/components/InterviewCard";
 import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
@@ -70,7 +70,13 @@ const Index = () => {
   const [interviews, setInterviews] = useState(mockInterviews);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState<typeof mockInterviews[0] | null>(null);
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  // Wait for mounting to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSearch = (query: string) => {
     if (query === "") {
@@ -89,14 +95,19 @@ const Index = () => {
     setSidebarOpen(true);
   };
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen gradient-bg">
       <div className="container px-4 py-8 mx-auto">
         <div className="flex justify-end mb-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-full"
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5" />
@@ -114,7 +125,7 @@ const Index = () => {
           <div className="flex justify-center gap-4 mb-8">
             <SearchBar onSearch={handleSearch} />
             <ShareExperienceDialog>
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Share Experience
               </Button>
