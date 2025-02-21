@@ -1,12 +1,11 @@
-
 import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import InterviewCard from "@/components/InterviewCard";
 import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import ShareExperienceDialog from "@/components/ShareExperienceDialog";
 
-// Temporary mock data - exported to share with other components
 export const mockInterviews = [
   {
     id: 1,
@@ -60,10 +59,12 @@ const Index = () => {
           </p>
           <div className="flex justify-center gap-4 mb-8">
             <SearchBar onSearch={handleSearch} />
-            <Button className="bg-primary hover:bg-primary/90">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Share Experience
-            </Button>
+            <ShareExperienceDialog>
+              <Button className="bg-primary hover:bg-primary/90">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Share Experience
+              </Button>
+            </ShareExperienceDialog>
           </div>
         </div>
 
