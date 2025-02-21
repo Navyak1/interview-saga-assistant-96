@@ -3,17 +3,20 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Calendar, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface InterviewCardProps {
+  id: number;
   company: string;
   position: string;
   date: string;
   experience: string;
   comments: number;
-  onAiAnalyze: () => void;
+  onAiAnalyze: (e: React.MouseEvent) => void;
 }
 
 const InterviewCard = ({
+  id,
   company,
   position,
   date,
@@ -21,8 +24,17 @@ const InterviewCard = ({
   comments,
   onAiAnalyze,
 }: InterviewCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/interview/${id}`);
+  };
+
   return (
-    <Card className="w-full transition-all duration-300 hover:shadow-lg animate-fade-up">
+    <Card 
+      className="w-full transition-all duration-300 hover:shadow-lg animate-fade-up cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="space-y-1">
           <h3 className="font-semibold text-xl">{company}</h3>
@@ -34,7 +46,10 @@ const InterviewCard = ({
           variant="outline"
           size="sm"
           className="ml-auto hover:bg-primary hover:text-white transition-colors"
-          onClick={onAiAnalyze}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAiAnalyze(e);
+          }}
         >
           AI Analysis
         </Button>

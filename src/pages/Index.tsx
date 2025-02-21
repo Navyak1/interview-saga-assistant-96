@@ -2,12 +2,12 @@
 import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import InterviewCard from "@/components/InterviewCard";
+import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 
-// Temporary mock data
-const mockInterviews = [
+// Temporary mock data - exported to share with other components
+export const mockInterviews = [
   {
     id: 1,
     company: "Tech Corp",
@@ -30,7 +30,8 @@ const mockInterviews = [
 
 const Index = () => {
   const [interviews, setInterviews] = useState(mockInterviews);
-  const { toast } = useToast();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedInterview, setSelectedInterview] = useState<typeof mockInterviews[0] | null>(null);
 
   const handleSearch = (query: string) => {
     if (query === "") {
@@ -43,12 +44,10 @@ const Index = () => {
     setInterviews(filtered);
   };
 
-  const handleAiAnalyze = () => {
-    toast({
-      title: "AI Analysis",
-      description: "AI analysis feature coming soon!",
-      duration: 3000,
-    });
+  const handleAiAnalyze = (interview: typeof mockInterviews[0]) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedInterview(interview);
+    setSidebarOpen(true);
   };
 
   return (
@@ -73,10 +72,18 @@ const Index = () => {
             <InterviewCard
               key={interview.id}
               {...interview}
-              onAiAnalyze={handleAiAnalyze}
+              onAiAnalyze={handleAiAnalyze(interview)}
             />
           ))}
         </div>
+
+        {selectedInterview && (
+          <AiAnalysisSidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            interviewData={selectedInterview}
+          />
+        )}
       </div>
     </div>
   );
