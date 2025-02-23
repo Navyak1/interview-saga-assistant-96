@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import SearchBar from "@/components/SearchBar";
 import InterviewCard from "@/components/InterviewCard";
@@ -8,7 +7,6 @@ import { PlusCircle, Moon, Sun } from "lucide-react";
 import ShareExperienceDialog from "@/components/ShareExperienceDialog";
 import { useTheme } from "next-themes";
 
-// Expanded mock data with more diverse experiences
 export const mockInterviews = [
   {
     id: 1,
@@ -73,7 +71,6 @@ const Index = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
-  // Wait for mounting to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -84,7 +81,8 @@ const Index = () => {
       return;
     }
     const filtered = mockInterviews.filter((interview) =>
-      interview.company.toLowerCase().includes(query.toLowerCase())
+      interview.company.toLowerCase().includes(query.toLowerCase()) ||
+      interview.position.toLowerCase().includes(query.toLowerCase())
     );
     setInterviews(filtered);
   };
@@ -95,19 +93,17 @@ const Index = () => {
     setSidebarOpen(true);
   };
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="container px-4 py-8 mx-auto">
         <div className="flex justify-end mb-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="rounded-full"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
             {theme === "dark" ? (
               <Sun className="h-5 w-5" />
@@ -125,7 +121,7 @@ const Index = () => {
           <div className="flex justify-center gap-4 mb-8">
             <SearchBar onSearch={handleSearch} />
             <ShareExperienceDialog>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Share Experience
               </Button>
