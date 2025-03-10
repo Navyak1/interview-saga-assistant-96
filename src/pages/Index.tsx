@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,7 +125,13 @@ const Index = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: z.infer<typeof formSchema>) => createInterviewExperience(values),
+    mutationFn: (values: z.infer<typeof formSchema>) => {
+      return createInterviewExperience({
+        company: values.company,
+        position: values.position,
+        experience: values.experience
+      });
+    },
     onSuccess: () => {
       toast({
         title: "Success",
