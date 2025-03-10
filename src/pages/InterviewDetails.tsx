@@ -6,23 +6,29 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Building2, Calendar, MessageSquare, HelpCircle, Users, Clock } from "lucide-react";
 import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
-
-// We'll move this to a proper data layer later
-import { mockInterviews } from "@/pages/Index";
+import { getInterviewExperienceById } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 const InterviewDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  const interview = mockInterviews.find((i) => i.id === Number(id));
+  const { data: interview, isLoading, error } = useQuery({
+    queryKey: ["interview", id],
+    queryFn: () => getInterviewExperienceById(Number(id)),
+  });
 
-  if (!interview) {
-    return <div>Interview not found</div>;
+  if (isLoading) {
+    return <div className="container mx-auto px-4 py-8">Loading interview details...</div>;
+  }
+
+  if (error || !interview) {
+    return <div className="container mx-auto px-4 py-8">Interview not found</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
       <div className="container px-4 py-8 mx-auto">
         <div className="flex justify-between items-center mb-6">
           <Button
@@ -43,7 +49,7 @@ const InterviewDetails = () => {
           </Button>
         </div>
 
-        <Card className="w-full animate-fade-up">
+        <Card className="w-full animate-fade-up dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <div className="space-y-2">
               <h1 className="font-semibold text-3xl">{interview.company}</h1>
@@ -53,7 +59,7 @@ const InterviewDetails = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-8">
-            <div className="flex justify-between text-sm text-muted-foreground border-b pb-4">
+            <div className="flex justify-between text-sm text-muted-foreground border-b pb-4 dark:border-gray-700">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 <span>{interview.company}</span>
@@ -91,7 +97,7 @@ const InterviewDetails = () => {
                 </div>
                 <div className="space-y-4">
                   {[1, 2, 3].map((round) => (
-                    <Card key={round}>
+                    <Card key={round} className="dark:bg-gray-700">
                       <CardContent className="pt-6">
                         <h3 className="font-medium mb-2">Round {round}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

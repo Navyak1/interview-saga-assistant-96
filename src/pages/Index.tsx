@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,7 +126,7 @@ const Index = () => {
     queryFn: () => getInterviewExperiences(searchQuery),
   });
 
-  const { mutate: createInterview, isLoading: isSubmitting } = useMutation({
+  const mutation = useMutation({
     mutationFn: createInterviewExperience,
     onSuccess: () => {
       toast({
@@ -151,7 +152,7 @@ const Index = () => {
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    createInterview(values);
+    mutation.mutate(values);
   };
 
   return (
@@ -185,7 +186,7 @@ const Index = () => {
               <GraduationCap className="h-4 w-4" />
               Skill Gap Analyzer
             </Button>
-            <Dialog>
+            <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
                   <PlusCircle className="h-4 w-4" />
@@ -244,8 +245,8 @@ const Index = () => {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Submitting..." : "Submit"}
+                    <Button type="submit" disabled={mutation.isPending}>
+                      {mutation.isPending ? "Submitting..." : "Submit"}
                     </Button>
                   </form>
                 </Form>
@@ -285,8 +286,8 @@ const Index = () => {
             </TableBody>
           </Table>
         ) : (
-          <Card>
-            <CardContent>
+          <Card className="dark:bg-gray-800">
+            <CardContent className="py-6">
               <p>No interview experiences found.</p>
             </CardContent>
           </Card>
