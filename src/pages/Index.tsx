@@ -1,154 +1,295 @@
-
 import { useState, useEffect } from "react";
-import SearchBar from "@/components/SearchBar";
-import InterviewCard from "@/components/InterviewCard";
-import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Moon, Sun } from "lucide-react";
-import ShareExperienceDialog from "@/components/ShareExperienceDialog";
-import { useTheme } from "next-themes";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PlusCircle, GraduationCap } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import {
+  createInterviewExperience,
+  getInterviewExperiences,
+} from "@/lib/api";
 
-// Expanded mock data with more diverse experiences
-export const mockInterviews = [
-  {
-    id: 1,
-    company: "Tech Corp",
-    position: "Senior Frontend Developer",
-    date: "2024-03-15",
-    experience:
-      "The interview consisted of 3 rounds. First was a technical screening where we discussed React hooks and state management. Second round involved a coding challenge about implementing a custom hook for data fetching. Final round was system design where I had to design a real-time chat application.",
-    comments: 5,
-  },
-  {
-    id: 2,
-    company: "Innovation Labs",
-    position: "Full Stack Engineer",
-    date: "2024-03-14",
-    experience:
-      "Started with behavioral questions about team collaboration. Then moved to technical discussion about microservices architecture. Coding round involved solving a problem about optimizing database queries.",
-    comments: 3,
-  },
-  {
-    id: 3,
-    company: "Global Software Inc",
-    position: "Cloud Solutions Architect",
-    date: "2024-03-13",
-    experience:
-      "Intensive system design rounds focusing on scalability and high availability. Had to design a distributed caching system and discuss various AWS services. Deep dive into previous projects involving cloud architecture.",
-    comments: 7,
-  },
-  {
-    id: 4,
-    company: "DataTech Solutions",
-    position: "Machine Learning Engineer",
-    date: "2024-03-12",
-    experience:
-      "Technical assessment included implementing a recommendation system. Discussion about various ML algorithms and their practical applications. Final round focused on deploying ML models in production.",
-    comments: 4,
-  },
-  {
-    id: 5,
-    company: "Startup Ventures",
-    position: "Mobile Developer",
-    date: "2024-03-11",
-    experience:
-      "Cross-platform development discussion with React Native vs Flutter debate. Live coding session building a simple social media feed. Architecture discussion about state management in mobile apps.",
-    comments: 6,
-  },
-  {
-    id: 6,
-    company: "Security Systems Co",
-    position: "Security Engineer",
-    date: "2024-03-10",
-    experience:
-      "Deep dive into cybersecurity concepts. Practical exercise involving identifying vulnerabilities in a sample application. Discussion about implementing OAuth2 and handling sensitive data.",
-    comments: 8,
-  }
-];
+const formSchema = z.object({
+  company: z.string().min(2, {
+    message: "Company must be at least 2 characters.",
+  }),
+  position: z.string().min(2, {
+    message: "Position must be at least 2 characters.",
+  }),
+  experience: z.string().min(10, {
+    message: "Experience must be at least 10 characters.",
+  }),
+});
 
-const Index = () => {
-  const [interviews, setInterviews] = useState(mockInterviews);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedInterview, setSelectedInterview] = useState<typeof mockInterviews[0] | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+const SearchBar = ({ onSearch }: { onSearch: (query: string) => void }) => {
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Wait for mounting to avoid hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const handleSearch = (query: string) => {
-    if (query === "") {
-      setInterviews(mockInterviews);
-      return;
-    }
-    const filtered = mockInterviews.filter((interview) =>
-      interview.company.toLowerCase().includes(query.toLowerCase())
-    );
-    setInterviews(filtered);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
-  const handleAiAnalyze = (interview: typeof mockInterviews[0]) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedInterview(interview);
-    setSidebarOpen(true);
+  const handleSearchClick = () => {
+    onSearch(searchQuery);
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
-    <div className="min-h-screen gradient-bg">
-      <div className="container px-4 py-8 mx-auto">
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
+    <div className="flex rounded-md shadow-sm">
+      <Input
+        type="text"
+        placeholder="Search..."
+        value={searchQuery}
+        onChange={handleInputChange}
+        className="rounded-r-none"
+      />
+      <Button
+        variant="outline"
+        className="rounded-l-none"
+        onClick={handleSearchClick}
+      >
+        Search
+      </Button>
+    </div>
+  );
+};
 
-        <div className="text-center mb-12 animate-fade-up">
-          <h1 className="text-4xl font-bold mb-4">Interview Helper</h1>
-          <p className="text-muted-foreground mb-8">
-            Learn from real interview experiences and prepare better
+const Index = () => {
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      company: "",
+      position: "",
+      experience: "",
+    },
+  });
+
+  const { data: interviewExperiences, isLoading } = useQuery({
+    queryKey: ["interviewExperiences", searchQuery],
+    queryFn: () => getInterviewExperiences(searchQuery),
+  });
+
+  const { mutate: createInterview, isLoading: isSubmitting } = useMutation({
+    mutationFn: createInterviewExperience,
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Interview experience shared successfully!",
+      });
+      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["interviewExperiences"] });
+      setIsShareModalOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description:
+          error?.message || "Failed to share interview experience. Try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    createInterview(values);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="bg-primary text-primary-foreground py-6">
+        <div className="container mx-auto px-4">
+          <h1 className="text-3xl font-bold">Share & Discover Interview Experiences</h1>
+          <p className="text-sm">
+            Contribute to the community by sharing your interview experiences and
+            learn from others.
           </p>
-          <div className="flex justify-center gap-4 mb-8">
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold">Recent Interview Experiences</h2>
+            <p className="text-muted-foreground">
+              Learn from others' interview journeys
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3">
             <SearchBar onSearch={handleSearch} />
-            <ShareExperienceDialog>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Share Experience
-              </Button>
-            </ShareExperienceDialog>
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = '/skill-gap-analyzer'}
+              className="flex items-center gap-2"
+            >
+              <GraduationCap className="h-4 w-4" />
+              Skill Gap Analyzer
+            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Share Your Experience
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Share Your Interview Experience</DialogTitle>
+                  <DialogDescription>
+                    Help others by sharing your recent interview experience.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="company"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Company</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter company name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="position"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Position</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter position applied for" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="experience"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Experience</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Share your interview experience..."
+                              className="min-h-[100px]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? "Submitting..." : "Submit"}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {interviews.map((interview) => (
-            <InterviewCard
-              key={interview.id}
-              {...interview}
-              onAiAnalyze={handleAiAnalyze(interview)}
-            />
-          ))}
-        </div>
-
-        {selectedInterview && (
-          <AiAnalysisSidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-            interviewData={selectedInterview}
-          />
+        {isLoading ? (
+          <p>Loading interview experiences...</p>
+        ) : interviewExperiences && interviewExperiences.length > 0 ? (
+          <Table>
+            <TableCaption>A list of recent interview experiences.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Company</TableHead>
+                <TableHead>Position</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {interviewExperiences.map((experience) => (
+                <TableRow key={experience.id}>
+                  <TableCell className="font-medium">{experience.company}</TableCell>
+                  <TableCell>{experience.position}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => navigate(`/interview/${experience.id}`)}
+                    >
+                      View Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <Card>
+            <CardContent>
+              <p>No interview experiences found.</p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
