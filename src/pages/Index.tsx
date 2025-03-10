@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,17 +40,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlusCircle, GraduationCap } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PlusCircle, GraduationCap, Building2, Calendar, Eye } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   useQuery,
@@ -256,35 +248,63 @@ const Index = () => {
         </div>
 
         {isLoading ? (
-          <p>Loading interview experiences...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardHeader className="p-6 pb-4">
+                  <Skeleton className="h-6 w-32 mb-2" />
+                  <Skeleton className="h-4 w-20" />
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  <Skeleton className="h-20" />
+                </CardContent>
+                <CardFooter className="flex justify-between p-6 pt-0 border-t">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-24" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         ) : interviewExperiences && interviewExperiences.length > 0 ? (
-          <Table>
-            <TableCaption>A list of recent interview experiences.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Company</TableHead>
-                <TableHead>Position</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {interviewExperiences.map((experience) => (
-                <TableRow key={experience.id}>
-                  <TableCell className="font-medium">{experience.company}</TableCell>
-                  <TableCell>{experience.position}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => navigate(`/interview/${experience.id}`)}
-                    >
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {interviewExperiences.map((experience) => (
+              <Card 
+                key={experience.id} 
+                className="overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer border border-border"
+                onClick={() => navigate(`/interview/${experience.id}`)}
+              >
+                <CardHeader className="p-6 pb-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-xl mb-1">{experience.company}</CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground font-medium">
+                        {experience.position}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {experience.experience}
+                  </p>
+                </CardContent>
+                <CardFooter className="flex justify-between p-4 border-t bg-muted/30">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Building2 className="h-4 w-4 mr-1" />
+                    <span>{experience.company}</span>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="ml-auto flex items-center gap-1"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>View</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         ) : (
           <Card className="dark:bg-gray-800">
             <CardContent className="py-6">
