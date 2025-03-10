@@ -127,7 +127,7 @@ const Index = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: createInterviewExperience,
+    mutationFn: (values: z.infer<typeof formSchema>) => createInterviewExperience(values),
     onSuccess: () => {
       toast({
         title: "Success",
