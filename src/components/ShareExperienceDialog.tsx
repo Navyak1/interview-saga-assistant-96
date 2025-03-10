@@ -28,16 +28,16 @@ const ShareExperienceDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button className="flex items-center gap-2">
           <PlusCircle className="h-4 w-4" />
           Share Your Experience
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Share Your Interview Experience</DialogTitle>
           <DialogDescription>
-            Help others by sharing your recent interview experience.
+            Help others prepare by sharing details about your interview process.
           </DialogDescription>
         </DialogHeader>
         <ShareExperienceForm onSubmit={onSubmit} isPending={isPending} />

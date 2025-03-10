@@ -1,6 +1,5 @@
 
-import { Building2, Calendar, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Building2, Calendar } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface InterviewExperience {
   id: number;
@@ -16,7 +16,6 @@ interface InterviewExperience {
   position: string;
   experience: string;
   date: string;
-  comments?: number;
 }
 
 interface InterviewExperienceCardProps {
@@ -59,7 +58,6 @@ const InterviewExperienceCard = ({ experience, onClick }: InterviewExperienceCar
           size="sm"
           className="ml-auto flex items-center gap-1"
         >
-          <Eye className="h-3.5 w-3.5" />
           <span>View</span>
         </Button>
       </CardFooter>

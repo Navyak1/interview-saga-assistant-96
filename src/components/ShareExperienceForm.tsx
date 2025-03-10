@@ -12,6 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 
 const formSchema = z.object({
@@ -51,7 +52,7 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
             <FormItem>
               <FormLabel>Company</FormLabel>
               <FormControl>
-                <Input placeholder="Enter company name" {...field} />
+                <Input placeholder="Enter company name (e.g., Google, Microsoft)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -64,7 +65,7 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
             <FormItem>
               <FormLabel>Position</FormLabel>
               <FormControl>
-                <Input placeholder="Enter position applied for" {...field} />
+                <Input placeholder="Enter position (e.g., Senior Frontend Developer)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,10 +77,13 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Experience</FormLabel>
+              <FormDescription>
+                Describe interview rounds, types of questions, and your overall experience
+              </FormDescription>
               <FormControl>
                 <Textarea
-                  placeholder="Describe your interview process including rounds, types of questions asked, and overall experience..."
-                  className="min-h-[100px]"
+                  placeholder="The interview process started with a phone screening followed by technical rounds. The questions focused on..."
+                  className="min-h-[120px]"
                   {...field}
                 />
               </FormControl>
@@ -87,8 +91,8 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Submitting..." : "Submit"}
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Submitting..." : "Submit Your Experience"}
         </Button>
       </form>
     </Form>

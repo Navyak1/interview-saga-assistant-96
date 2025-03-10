@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -28,7 +29,7 @@ const InterviewSearchBar = ({ onSearch }: SearchBarProps) => {
     <div className="flex rounded-md shadow-sm">
       <Input
         type="text"
-        placeholder="Search..."
+        placeholder="Search companies, positions..."
         value={searchQuery}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
@@ -39,6 +40,7 @@ const InterviewSearchBar = ({ onSearch }: SearchBarProps) => {
         className="rounded-l-none"
         onClick={handleSearchClick}
       >
+        <Search className="h-4 w-4 mr-1.5" />
         Search
       </Button>
     </div>
