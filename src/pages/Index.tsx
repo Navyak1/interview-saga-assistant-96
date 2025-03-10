@@ -77,6 +77,12 @@ const SearchBar = ({ onSearch }: { onSearch: (query: string) => void }) => {
     onSearch(searchQuery);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSearch(searchQuery);
+    }
+  };
+
   return (
     <div className="flex rounded-md shadow-sm">
       <Input
@@ -84,6 +90,7 @@ const SearchBar = ({ onSearch }: { onSearch: (query: string) => void }) => {
         placeholder="Search..."
         value={searchQuery}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         className="rounded-r-none"
       />
       <Button
@@ -228,7 +235,7 @@ const Index = () => {
                           <FormLabel>Experience</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Share your interview experience..."
+                              placeholder="Describe your interview process including rounds, types of questions asked, and overall experience..."
                               className="min-h-[100px]"
                               {...field}
                             />
@@ -292,6 +299,10 @@ const Index = () => {
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Building2 className="h-4 w-4 mr-1" />
                     <span>{experience.company}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    <span>{experience.date}</span>
                   </div>
                   <Button
                     variant="secondary"
