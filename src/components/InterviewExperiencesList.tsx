@@ -1,16 +1,7 @@
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import InterviewExperienceCard from "./InterviewExperienceCard";
-
-interface InterviewExperience {
-  id: number;
-  company: string;
-  position: string;
-  experience: string;
-  date: string;
-  comments?: number;
-}
+import { InterviewExperience } from "@/types";
 
 interface InterviewExperiencesListProps {
   experiences: InterviewExperience[] | undefined;

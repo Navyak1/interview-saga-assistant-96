@@ -1,19 +1,6 @@
+import { InterviewExperience } from "@/types";
 
 // This file contains API functions for interacting with interview experiences
-
-interface InterviewExperience {
-  id: number;
-  company: string;
-  position: string;
-  interviewRounds?: string;
-  technicalQuestions?: string;
-  systemDesign?: string;
-  behavioralQuestions?: string;
-  overallExperience?: string;
-  experience?: string;
-  date: string;
-  comments?: number;
-}
 
 // Mock data for development purposes
 // Store mockInterviews in localStorage to persist data between page navigations

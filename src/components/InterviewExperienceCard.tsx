@@ -9,14 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-interface InterviewExperience {
-  id: number;
-  company: string;
-  position: string;
-  experience: string;
-  date: string;
-}
+import { InterviewExperience } from "@/types";
 
 interface InterviewExperienceCardProps {
   experience: InterviewExperience;
@@ -45,7 +38,7 @@ const InterviewExperienceCard = ({ experience, onClick }: InterviewExperienceCar
       </CardHeader>
       <CardContent className="p-6 pt-0">
         <p className="text-sm text-muted-foreground line-clamp-3">
-          {experience.experience}
+          {experience.experience || experience.overallExperience || "No experience details"}
         </p>
       </CardContent>
       <CardFooter className="flex justify-between p-4 border-t bg-muted/30">

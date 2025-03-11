@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { ArrowLeft, Building2, Calendar, MessageSquare, HelpCircle, Users, Clock
 import AiAnalysisSidebar from "@/components/AiAnalysisSidebar";
 import { getInterviewExperienceById } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
+import { InterviewExperience } from "@/types";
 
 const InterviewDetails = () => {
   const { id } = useParams();

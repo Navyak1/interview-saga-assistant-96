@@ -11,6 +11,7 @@ import InterviewExperiencesList from "@/components/InterviewExperiencesList";
 import ShareExperienceDialog from "@/components/ShareExperienceDialog";
 import { formSchema } from "@/components/ShareExperienceForm";
 import * as z from "zod";
+import { InterviewExperience } from "@/types";
 
 const Index = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);

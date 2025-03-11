@@ -6,17 +6,12 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { analyzeInterviewExperience } from "@/lib/ai-analysis";
-
-interface InterviewData {
-  company: string;
-  position: string;
-  experience: string;
-}
+import { InterviewExperience } from "@/types";
 
 interface AiAnalysisSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  interviewData: InterviewData;
+  interviewData: InterviewExperience;
 }
 
 interface AnalysisResult {
@@ -37,7 +32,14 @@ const AiAnalysisSidebar = ({ isOpen, onClose, interviewData }: AiAnalysisSidebar
       setIsLoading(true);
       setError(null);
       
-      analyzeInterviewExperience(interviewData)
+      // Use either experience or overallExperience based on what's available
+      const experienceText = interviewData.experience || interviewData.overallExperience || "";
+      
+      analyzeInterviewExperience({
+        company: interviewData.company,
+        position: interviewData.position,
+        experience: experienceText
+      })
         .then(result => {
           setAnalysis(result);
           setIsLoading(false);
