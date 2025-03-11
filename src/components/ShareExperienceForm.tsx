@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -58,7 +57,10 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 scrollbar-none"
+      >
         <FormField
           control={form.control}
           name="company"
