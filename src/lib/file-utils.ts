@@ -13,11 +13,25 @@ export const extractTextFromFile = async (file: File): Promise<string> => {
     
     reader.onload = (event) => {
       try {
-        // This simplified version just returns the raw text
-        // In a real app, you'd need proper parsing based on file type
-        const text = event.target?.result as string;
-        resolve(text);
+        // Check if the file is a text file or similar
+        if (file.type === 'text/plain' || 
+            file.name.endsWith('.txt') ||
+            file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            file.type === 'application/msword' ||
+            file.type === 'application/pdf') {
+          
+          // For this demo, we'll use a simple text extraction
+          // In a real implementation, you'd use different methods based on file type
+          const text = event.target?.result as string;
+          
+          // Clean up any non-readable characters before passing to the API
+          const cleanedText = text.replace(/[^\x20-\x7E\r\n]/g, ' ').trim();
+          resolve(cleanedText);
+        } else {
+          reject(new Error("Unsupported file type"));
+        }
       } catch (error) {
+        console.error("Error parsing file:", error);
         reject(new Error("Failed to parse file content"));
       }
     };
@@ -27,7 +41,6 @@ export const extractTextFromFile = async (file: File): Promise<string> => {
     };
     
     // Read as text for simplicity
-    // In a real implementation, you'd use different methods based on file type
     reader.readAsText(file);
   });
 };

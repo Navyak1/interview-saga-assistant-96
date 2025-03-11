@@ -3,10 +3,87 @@
 const API_KEY = "AIzaSyBp4oDLmglH38eg1jdbew3C0RYI4VSEcWU";
 
 /**
+ * Handles API requests with retry logic for rate limiting
+ */
+async function makeGeminiRequest(prompt: string, maxRetries = 2) {
+  let retries = 0;
+  
+  while (retries <= maxRetries) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: prompt,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.4,
+              topK: 32,
+              topP: 0.95,
+              maxOutputTokens: 4096, // Reduced to help with rate limits
+            },
+          }),
+        }
+      );
+
+      if (response.status === 429) {
+        console.log(`Rate limit hit, retry ${retries + 1}/${maxRetries}`);
+        retries++;
+        // Wait before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 2000 * Math.pow(2, retries)));
+        continue;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Gemini API error:", errorData);
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Extract the content from the response
+      const content = data.candidates[0].content.parts[0].text;
+      
+      // Find the JSON string in the content (in case there's any text before/after)
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("Could not extract JSON from the response");
+      }
+      
+      // Parse the JSON string
+      return JSON.parse(jsonMatch[0]);
+    } catch (error) {
+      if (retries >= maxRetries) {
+        console.error("Max retries reached for Gemini API request", error);
+        throw error;
+      }
+      retries++;
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, 2000 * Math.pow(2, retries)));
+    }
+  }
+}
+
+/**
  * Analyzes the skill gap between user's resume and desired job role
  */
 export async function analyzeSkillGap(resume: string, jobRole: string) {
   try {
+    // Trim the resume if it's too long to prevent token limit issues
+    const trimmedResume = resume.length > 10000 ? resume.substring(0, 10000) + "..." : resume;
+    
     const prompt = `
       I want you to act as a career advisor and skills gap analyzer. I'll provide my resume content and my desired job role. Please analyze both and give me:
 
@@ -16,7 +93,7 @@ export async function analyzeSkillGap(resume: string, jobRole: string) {
       4. Specific recommendations to improve my chances
       5. Recommended learning resources (courses, books, certifications)
 
-      My resume: ${resume}
+      My resume: ${trimmedResume}
       
       My desired job role: ${jobRole}
 
@@ -36,54 +113,7 @@ export async function analyzeSkillGap(resume: string, jobRole: string) {
       }
     `;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.4,
-            topK: 32,
-            topP: 0.95,
-            maxOutputTokens: 8192,
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Gemini API error:", errorData);
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    // Extract the content from the response
-    const content = data.candidates[0].content.parts[0].text;
-    
-    // Find the JSON string in the content (in case there's any text before/after)
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Could not extract JSON from the response");
-    }
-    
-    // Parse the JSON string
-    const parsedResult = JSON.parse(jsonMatch[0]);
-    
-    return parsedResult;
+    return await makeGeminiRequest(prompt);
   } catch (error) {
     console.error("Error analyzing skill gap:", error);
     throw error;
@@ -95,10 +125,13 @@ export async function analyzeSkillGap(resume: string, jobRole: string) {
  */
 export async function analyzeResume(resume: string, jobRole: string) {
   try {
+    // Trim the resume if it's too long to prevent token limit issues
+    const trimmedResume = resume.length > 10000 ? resume.substring(0, 10000) + "..." : resume;
+    
     const prompt = `
       I want you to act as a professional resume reviewer. I'll provide my resume content and my desired job role. Please analyze my resume and give me specific suggestions to improve it for this job role.
 
-      My resume: ${resume}
+      My resume: ${trimmedResume}
       
       My desired job role: ${jobRole}
 
@@ -121,54 +154,7 @@ export async function analyzeResume(resume: string, jobRole: string) {
       }
     `;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.4,
-            topK: 32,
-            topP: 0.95,
-            maxOutputTokens: 8192,
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Gemini API error:", errorData);
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    // Extract the content from the response
-    const content = data.candidates[0].content.parts[0].text;
-    
-    // Find the JSON string in the content (in case there's any text before/after)
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Could not extract JSON from the response");
-    }
-    
-    // Parse the JSON string
-    const parsedResult = JSON.parse(jsonMatch[0]);
-    
-    return parsedResult;
+    return await makeGeminiRequest(prompt);
   } catch (error) {
     console.error("Error analyzing resume:", error);
     throw error;

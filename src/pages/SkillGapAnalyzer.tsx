@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, FileText, TrendingUp, Search, ArrowLeft, Upload } from "lucide-react";
+import { GraduationCap, FileText, TrendingUp, Search, ArrowLeft, Upload, AlertTriangle } from "lucide-react";
 import SkillGapResults from "@/components/SkillGapResults";
 import { analyzeSkillGap, analyzeResume } from "@/lib/gemini-api";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +21,7 @@ const SkillGapAnalyzer = () => {
   const [results, setResults] = useState<any>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isFileProcessing, setIsFileProcessing] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -34,7 +34,11 @@ const SkillGapAnalyzer = () => {
       'text/plain'
     ];
 
-    if (!allowedTypes.includes(selectedFile.type)) {
+    if (!allowedTypes.includes(selectedFile.type) && 
+        !selectedFile.name.endsWith('.txt') && 
+        !selectedFile.name.endsWith('.doc') && 
+        !selectedFile.name.endsWith('.docx') && 
+        !selectedFile.name.endsWith('.pdf')) {
       toast({
         title: "Invalid file type",
         description: "Please upload a PDF, DOC, DOCX, or TXT file",
@@ -45,9 +49,17 @@ const SkillGapAnalyzer = () => {
 
     setFile(selectedFile);
     setIsFileProcessing(true);
+    setApiError(null);
     
     try {
       const text = await extractTextFromFile(selectedFile);
+      console.log("Extracted text length:", text.length);
+      console.log("Text sample:", text.substring(0, 200));
+      
+      if (!text || text.trim().length < 50) {
+        throw new Error("Could not extract enough text from the file");
+      }
+      
       setResume(text);
       toast({
         title: "Resume loaded",
@@ -56,7 +68,7 @@ const SkillGapAnalyzer = () => {
     } catch (error) {
       toast({
         title: "File processing error",
-        description: "Failed to extract text from your resume file",
+        description: "Failed to extract text from your resume file. Try copying and pasting it instead.",
         variant: "destructive",
       });
       console.error("File processing error:", error);
@@ -87,12 +99,20 @@ const SkillGapAnalyzer = () => {
     }
 
     setIsAnalyzing(true);
+    setApiError(null);
     
     try {
+      toast({
+        title: "Analysis started",
+        description: "This may take a minute or two. Please be patient.",
+      });
+      
       const data = await analyzeSkillGap(resume, jobRole);
+      console.log("Skill gap analysis complete:", data);
 
       // Get resume improvement suggestions
       const resumeSuggestions = await analyzeResume(resume, jobRole);
+      console.log("Resume analysis complete:", resumeSuggestions);
       
       // Combine the analysis results
       const combinedResults = {
@@ -107,9 +127,10 @@ const SkillGapAnalyzer = () => {
       });
     } catch (error) {
       console.error("Analysis error:", error);
+      setApiError("The analysis service is currently unavailable due to high demand. Please try again in a few minutes.");
       toast({
         title: "Analysis failed",
-        description: "There was an error analyzing your skills. Please try again.",
+        description: "There was an error analyzing your skills. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -195,6 +216,13 @@ const SkillGapAnalyzer = () => {
                     Be specific about the role you're targeting
                   </p>
                 </div>
+
+                {apiError && (
+                  <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-800 p-3 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-300">
+                    <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+                    <p className="text-sm">{apiError}</p>
+                  </div>
+                )}
 
                 <Button type="submit" className="w-full" disabled={isAnalyzing || isFileProcessing}>
                   {isAnalyzing ? (
