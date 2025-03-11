@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -57,20 +57,16 @@ const InterviewDetails = () => {
                 {interview.position}
               </Badge>
             </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>{interview.date}</span>
+            </div>
           </CardHeader>
           <CardContent className="space-y-8">
             <div className="flex justify-between text-sm text-muted-foreground border-b pb-4 dark:border-gray-700">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 <span>{interview.company}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{interview.date}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                <span>{interview.comments || 0} comments</span>
               </div>
             </div>
 

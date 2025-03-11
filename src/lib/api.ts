@@ -7,7 +7,6 @@ interface InterviewExperience {
   position: string;
   experience: string;
   date: string;
-  comments?: number; // Make comments optional since it's referenced in InterviewDetails
 }
 
 // Mock data for development purposes
@@ -76,8 +75,7 @@ export const createInterviewExperience = async (data: {
     company: data.company,
     position: data.position,
     experience: data.experience,
-    date: new Date().toISOString().split('T')[0],
-    comments: 0 // Add default value for comments
+    date: new Date().toISOString().split('T')[0]
   };
   
   // In a real app, we would save this to a database

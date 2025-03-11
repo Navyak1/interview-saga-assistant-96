@@ -37,6 +37,10 @@ const InterviewExperienceCard = ({ experience, onClick }: InterviewExperienceCar
               {experience.position}
             </CardDescription>
           </div>
+          <div className="bg-primary/10 text-primary px-2 py-1 rounded text-xs flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            <span>{experience.date}</span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-6 pt-0">
@@ -48,10 +52,6 @@ const InterviewExperienceCard = ({ experience, onClick }: InterviewExperienceCar
         <div className="flex items-center text-sm text-muted-foreground">
           <Building2 className="h-4 w-4 mr-1" />
           <span>{experience.company}</span>
-        </div>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4 mr-1" />
-          <span>{experience.date}</span>
         </div>
         <Button
           variant="secondary"
