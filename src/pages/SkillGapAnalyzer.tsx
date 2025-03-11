@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { GraduationCap, FileText, TrendingUp, Search, ArrowLeft } from "lucide-react";
+import { GraduationCap, FileText, TrendingUp, Search, ArrowLeft, Upload } from "lucide-react";
 import SkillGapResults from "@/components/SkillGapResults";
-import { analyzeSkillGap } from "@/lib/gemini-api";
+import { analyzeSkillGap, analyzeResume } from "@/lib/gemini-api";
 import { useNavigate } from "react-router-dom";
+import { extractTextFromFile } from "@/lib/file-utils";
 
 const SkillGapAnalyzer = () => {
   const { toast } = useToast();
@@ -19,6 +20,50 @@ const SkillGapAnalyzer = () => {
   const [jobRole, setJobRole] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<any>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [isFileProcessing, setIsFileProcessing] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    const allowedTypes = [
+      'application/pdf', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+      'application/msword', // doc
+      'text/plain'
+    ];
+
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF, DOC, DOCX, or TXT file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFile(selectedFile);
+    setIsFileProcessing(true);
+    
+    try {
+      const text = await extractTextFromFile(selectedFile);
+      setResume(text);
+      toast({
+        title: "Resume loaded",
+        description: "Your resume has been successfully uploaded and parsed",
+      });
+    } catch (error) {
+      toast({
+        title: "File processing error",
+        description: "Failed to extract text from your resume file",
+        variant: "destructive",
+      });
+      console.error("File processing error:", error);
+    } finally {
+      setIsFileProcessing(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +71,7 @@ const SkillGapAnalyzer = () => {
     if (!resume.trim()) {
       toast({
         title: "Missing resume",
-        description: "Please enter your resume content",
+        description: "Please enter your resume content or upload a file",
         variant: "destructive",
       });
       return;
@@ -45,7 +90,17 @@ const SkillGapAnalyzer = () => {
     
     try {
       const data = await analyzeSkillGap(resume, jobRole);
-      setResults(data);
+
+      // Get resume improvement suggestions
+      const resumeSuggestions = await analyzeResume(resume, jobRole);
+      
+      // Combine the analysis results
+      const combinedResults = {
+        ...data,
+        resumeSuggestions: resumeSuggestions.suggestions
+      };
+      
+      setResults(combinedResults);
       toast({
         title: "Analysis complete",
         description: "Your skill gap analysis is ready to view",
@@ -95,6 +150,26 @@ const SkillGapAnalyzer = () => {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
+                  <Label htmlFor="resumeUpload">Upload Resume (PDF, DOC, DOCX, TXT)</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="resumeUpload"
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt"
+                      onChange={handleFileChange}
+                      disabled={isFileProcessing}
+                      className="flex-1"
+                    />
+                    {isFileProcessing && (
+                      <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Or paste your resume text below
+                  </p>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="resume">Resume Content</Label>
                   <Textarea
                     id="resume"
@@ -121,7 +196,7 @@ const SkillGapAnalyzer = () => {
                   </p>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isAnalyzing}>
+                <Button type="submit" className="w-full" disabled={isAnalyzing || isFileProcessing}>
                   {isAnalyzing ? (
                     <>
                       <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
