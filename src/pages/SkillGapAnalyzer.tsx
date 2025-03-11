@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -25,22 +24,22 @@ const SkillGapAnalyzer = () => {
     try {
       toast({
         title: "Analysis started",
-        description: "This may take a minute or two. Please be patient.",
+        description: "This may take a moment. Please be patient.",
       });
       
       const trimmedResume = resume.length > 10000 ? resume.substring(0, 10000) + "..." : resume;
       
-      const data = await analyzeSkillGap(trimmedResume, jobRole);
-      console.log("Skill gap analysis complete:", data);
-
-      // Get resume improvement suggestions
-      const resumeSuggestions = await analyzeResume(trimmedResume, jobRole);
+      const [skillGapData, resumeSuggestions] = await Promise.all([
+        analyzeSkillGap(trimmedResume, jobRole),
+        analyzeResume(trimmedResume, jobRole)
+      ]);
+      
+      console.log("Skill gap analysis complete:", skillGapData);
       console.log("Resume analysis complete:", resumeSuggestions);
       
-      // Combine the analysis results
       const combinedResults = {
-        ...data,
-        resumeSuggestions: resumeSuggestions.suggestions
+        ...skillGapData,
+        resumeSuggestions: resumeSuggestions.suggestions || []
       };
       
       setResults(combinedResults);
@@ -50,10 +49,10 @@ const SkillGapAnalyzer = () => {
       });
     } catch (error) {
       console.error("Analysis error:", error);
-      setApiError("The analysis service is currently unavailable due to high demand. Please try again in a few minutes.");
+      setApiError("There was an error analyzing your skills. Please try again with a more detailed resume and job role.");
       toast({
         title: "Analysis failed",
-        description: "There was an error analyzing your skills. Please try again later.",
+        description: "There was an error analyzing your skills. Please try again with different input.",
         variant: "destructive",
       });
     } finally {
