@@ -58,7 +58,7 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
         <FormField
           control={form.control}
           name="company"
@@ -192,7 +192,14 @@ const ShareExperienceForm = ({ onSubmit, isPending }: ShareExperienceFormProps) 
         />
         
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Submitting..." : "Submit Your Experience"}
+          <span className="inline-block relative">
+            <span className={`inline-block transition-transform duration-300 ${isPending ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+              Submit Your Experience
+            </span>
+            <span className={`absolute top-0 left-0 inline-block transition-transform duration-300 ${isPending ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
+              Submitting...
+            </span>
+          </span>
         </Button>
       </form>
     </Form>

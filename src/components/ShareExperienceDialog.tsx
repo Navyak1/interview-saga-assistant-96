@@ -30,10 +30,12 @@ const ShareExperienceDialog = ({
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2">
           <PlusCircle className="h-4 w-4" />
-          Share Your Experience
+          <span className="inline-block transition-transform hover:-translate-y-1 duration-300">
+            Share Your Experience
+          </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Share Your Interview Experience</DialogTitle>
           <DialogDescription>
