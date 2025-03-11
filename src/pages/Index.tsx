@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,11 @@ const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Force a refresh when the component mounts
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["interviewExperiences"] });
+  }, [queryClient]);
 
   const { data: interviewExperiences, isLoading } = useQuery({
     queryKey: ["interviewExperiences", searchQuery],
