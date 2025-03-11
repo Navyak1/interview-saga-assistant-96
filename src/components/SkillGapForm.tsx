@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +21,56 @@ const SkillGapForm = ({ onSubmit, isAnalyzing, apiError }: SkillGapFormProps) =>
   const [jobRole, setJobRole] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isFileProcessing, setIsFileProcessing] = useState(false);
+  const [autoDetectedRole, setAutoDetectedRole] = useState("");
+
+  // Auto-analyze when resume changes and job role exists
+  useEffect(() => {
+    if (resume && resume.trim().length > 100 && jobRole && !isAnalyzing && !isFileProcessing) {
+      handleSubmit();
+    }
+  }, [resume, jobRole, isAnalyzing, isFileProcessing]);
+
+  // Auto-detect job role from resume text
+  useEffect(() => {
+    if (resume && resume.trim().length > 100 && !jobRole) {
+      detectJobRole(resume);
+    }
+  }, [resume]);
+
+  const detectJobRole = async (resumeText: string) => {
+    try {
+      // Simple heuristic to extract potential job titles from resume
+      const commonTitles = [
+        "Software Engineer", "Frontend Developer", "Backend Developer", 
+        "Full Stack Developer", "Data Scientist", "Product Manager",
+        "UX Designer", "UI Designer", "DevOps Engineer", "Project Manager",
+        "React Developer", "Node.js Developer", "JavaScript Developer",
+        "Python Developer", "Java Developer", "Mobile Developer",
+        "iOS Developer", "Android Developer", "Machine Learning Engineer"
+      ];
+      
+      // Find potential job titles in resume
+      const foundTitles = commonTitles.filter(title => 
+        resumeText.toLowerCase().includes(title.toLowerCase())
+      );
+      
+      if (foundTitles.length > 0) {
+        // Get the first found title as a suggestion
+        setAutoDetectedRole(foundTitles[0]);
+        
+        // If no job role is set yet, auto-populate with suggestion
+        if (!jobRole) {
+          setJobRole(foundTitles[0]);
+          toast({
+            title: "Job role detected",
+            description: `We've detected "${foundTitles[0]}" as a potential job role from your resume.`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error detecting job role:", error);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -75,8 +125,10 @@ const SkillGapForm = ({ onSubmit, isAnalyzing, apiError }: SkillGapFormProps) =>
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     
     if (!resume.trim()) {
       toast({
@@ -112,7 +164,7 @@ const SkillGapForm = ({ onSubmit, isAnalyzing, apiError }: SkillGapFormProps) =>
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="resumeUpload">Upload Resume (PDF, DOC, DOCX, TXT)</Label>
               <div className="flex items-center gap-2">
@@ -155,6 +207,11 @@ const SkillGapForm = ({ onSubmit, isAnalyzing, apiError }: SkillGapFormProps) =>
                 value={jobRole}
                 onChange={(e) => setJobRole(e.target.value)}
               />
+              {autoDetectedRole && !jobRole && (
+                <p className="text-xs text-primary mt-1">
+                  Suggested role: {autoDetectedRole} (detected from your resume)
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 Be specific about the role you're targeting
               </p>
