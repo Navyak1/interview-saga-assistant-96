@@ -34,7 +34,11 @@ const Index = () => {
       return createInterviewExperience({
         company: values.company,
         position: values.position,
-        experience: values.experience
+        interviewRounds: values.interviewRounds,
+        technicalQuestions: values.technicalQuestions,
+        systemDesign: values.systemDesign,
+        behavioralQuestions: values.behavioralQuestions,
+        overallExperience: values.overallExperience
       });
     },
     onSuccess: () => {
