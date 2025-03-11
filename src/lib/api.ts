@@ -40,7 +40,7 @@ export const getInterviewExperiences = async (searchQuery?: string): Promise<Int
   await new Promise(resolve => setTimeout(resolve, 500));
   
   if (!searchQuery) {
-    return mockInterviews;
+    return [...mockInterviews]; // Return a copy to avoid unintended mutations
   }
   
   const query = searchQuery.toLowerCase();
